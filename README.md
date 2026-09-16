@@ -12,18 +12,15 @@ Built for **ET AI Hackathon 2.0 · Problem #8: Industrial Knowledge Intelligence
 [![Claude API](https://img.shields.io/badge/LLM-Claude_API-D97757)](https://www.anthropic.com/)
 [![ChromaDB](https://img.shields.io/badge/Vectors-ChromaDB-4B32C3)](https://www.trychroma.com/)
 [![NetworkX](https://img.shields.io/badge/Graph-NetworkX-2C5BB4)](https://networkx.org/)
-[![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)](ET_HACKATHLAON--main/Dockerfile)
-[![CI](https://img.shields.io/badge/CI-pytest-0A9EDC)](ET_HACKATHLAON--main/.github/workflows/tests.yml)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](ET_HACKATHLAON--main/LICENSE)
+[![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)](Dockerfile)
+[![CI](https://img.shields.io/badge/CI-pytest-0A9EDC)](.github/workflows/tests.yml)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**[📄 Full write-up](ET_HACKATHLAON--main/Industrial_Knowledge_Intelligence_Detailed_Document.pdf)** ·
-**[🗺️ Architecture diagram](ET_HACKATHLAON--main/architecture_diagram.png)** ·
-**[📊 Deck](ET_HACKATHLAON--main/Industrial_Knowledge_Intelligence_Deck.pptx)** ·
-**[🎬 Demo video](ET_HACKATHLAON--main/demo_video.mp4)**
+**[📄 Full write-up](Industrial_Knowledge_Intelligence_Detailed_Document.pdf)** ·
+**[🗺️ Architecture diagram](architecture_diagram.png)** ·
+**[📊 Deck](Industrial_Knowledge_Intelligence_Deck.pptx)**
 
 </div>
-
-> **Note on layout:** the runnable project currently lives in the [`ET_HACKATHLAON--main/`](ET_HACKATHLAON--main/) directory. All paths below are relative to that folder unless linked otherwise.
 
 ---
 
@@ -78,7 +75,6 @@ earlier warning chain.**
 ## Quick start
 
 ```bash
-cd ET_HACKATHLAON--main
 pip install -r requirements.txt
 
 # System dependency: Tesseract OCR (only needed when (re)building the vector
@@ -166,7 +162,7 @@ aggregate averages.** Q02 remains capped by hop-0 tie-flooding (root-cause trace
 ## Repo structure
 
 ```
-ET_HACKATHLAON--main/
+
   ingest/          the 7-stage pipeline (see Architecture above)
   data/corpus/     the locked document corpus (synthetic, real OEM manuals, scanned)
   data/eval/       benchmark questions, ground truth, results, FailureSensorIQ reference data
@@ -188,9 +184,9 @@ The corpus is a locked mix of:
 - **3 degraded scans** for OCR testing, and
 - IBM's **FailureSensorIQ** dataset (CC-BY-4.0) as reference evaluation data.
 
-Full provenance, sources, and structure: [`data/DATASET_README.md`](ET_HACKATHLAON--main/data/DATASET_README.md).
+Full provenance, sources, and structure: [`data/DATASET_README.md`](data/DATASET_README.md).
 FailureSensorIQ-specific reference material (citation, subsets, benchmark details):
-[`data/eval/FAILURESENSORIQ_NOTES.md`](ET_HACKATHLAON--main/data/eval/FAILURESENSORIQ_NOTES.md).
+[`data/eval/FAILURESENSORIQ_NOTES.md`](data/eval/FAILURESENSORIQ_NOTES.md).
 
 ---
 
@@ -216,6 +212,6 @@ FailureSensorIQ-specific reference material (citation, subsets, benchmark detail
 <div align="center">
 
 Built for **ET AI Hackathon 2.0** · Problem #8 · Industrial Knowledge Intelligence
-[MIT License](ET_HACKATHLAON--main/LICENSE)
+[MIT License](LICENSE)
 
 </div>

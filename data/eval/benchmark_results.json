@@ -1,0 +1,338 @@
+{
+  "top_k": 12,
+  "per_question": [
+    {
+      "id": "Q01_STAR",
+      "retrieval_type": "graph_only",
+      "question": "Was there any early warning before the Pump P-204 failure, and what should have been done according to procedure?",
+      "hops": [
+        "IR-556",
+        "ML-1183",
+        "VS-204",
+        "INC-2024-07",
+        "M-118"
+      ],
+      "vector_recall": 0.8,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 0.4,
+      "hybrid_recall_at5": 0.6,
+      "vector_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "PWI_IOM.pdf",
+        "IR-556_inspection_report.pdf",
+        "SH-0717_shift_handover.pdf",
+        "IR-560_motor_inspection.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "M-118_procedure.pdf"
+      ],
+      "hybrid_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "IR-556_inspection_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "SH-0717_shift_handover.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "M-118_procedure.pdf",
+        "PWI_IOM.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "MaintMaster_manual.pdf",
+        "VS-204_vibration_trend_log.pdf"
+      ]
+    },
+    {
+      "id": "Q02",
+      "retrieval_type": "graph_only",
+      "question": "Which regulation governs bearing replacement timelines for Pump P-204?",
+      "hops": [
+        "P-204",
+        "M-118",
+        "OISD-132"
+      ],
+      "vector_recall": 0.3333333333333333,
+      "hybrid_recall": 0.3333333333333333,
+      "vector_recall_at5": 0.3333333333333333,
+      "hybrid_recall_at5": 0.0,
+      "vector_ranking": [
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "M-118_procedure.pdf",
+        "IR-560_motor_inspection.pdf",
+        "PWI_IOM.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "SH-0717_shift_handover.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "M-142_seal_procedure.pdf"
+      ],
+      "hybrid_ranking": [
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "M-142_seal_procedure.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "M-118_procedure.pdf",
+        "SH-0717_shift_handover.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "MaintMaster_manual.pdf"
+      ]
+    },
+    {
+      "id": "Q03",
+      "retrieval_type": "keyword_answerable",
+      "question": "What is the vibration alarm threshold for Pump P-204's DE bearing?",
+      "hops": [
+        "VS-204"
+      ],
+      "vector_recall": 1.0,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 1.0,
+      "hybrid_recall_at5": 1.0,
+      "vector_ranking": [
+        "IR-556_inspection_report.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "IR-560_motor_inspection.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SH-0717_shift_handover.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "M-118_procedure.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "PWI_IOM.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "LS-07_lubrication_spec.pdf"
+      ],
+      "hybrid_ranking": [
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "IR-560_motor_inspection.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SH-0717_shift_handover.pdf",
+        "M-118_procedure.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "MaintMaster_manual.pdf",
+        "M-142_seal_procedure.pdf"
+      ]
+    },
+    {
+      "id": "Q04",
+      "retrieval_type": "keyword_answerable",
+      "question": "What lubricant grade is specified for feed water pumps?",
+      "hops": [
+        "LS-07"
+      ],
+      "vector_recall": 1.0,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 1.0,
+      "hybrid_recall_at5": 1.0,
+      "vector_ranking": [
+        "LS-07_lubrication_spec.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "PWI_IOM.pdf",
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "M-118_procedure.pdf",
+        "ML-1183_maintenance_log.pdf"
+      ],
+      "hybrid_ranking": [
+        "LS-07_lubrication_spec.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "IR-556_inspection_report.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "M-118_procedure.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "PWI_IOM.pdf",
+        "IR-560_motor_inspection.pdf",
+        "MaintMaster_manual.pdf",
+        "SH-0717_shift_handover.pdf",
+        "VS-204_vibration_trend_log.pdf"
+      ]
+    },
+    {
+      "id": "Q05",
+      "retrieval_type": "hybrid",
+      "question": "Who inspected Pump P-204 and were they qualified?",
+      "hops": [
+        "IR-556"
+      ],
+      "vector_recall": 1.0,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 1.0,
+      "hybrid_recall_at5": 1.0,
+      "vector_ranking": [
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "PWI_IOM.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "SH-0717_shift_handover.pdf"
+      ],
+      "hybrid_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "IR-556_inspection_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "SH-0717_shift_handover.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "PWI_IOM.pdf",
+        "MaintMaster_manual.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "M-118_procedure.pdf"
+      ]
+    },
+    {
+      "id": "Q06",
+      "retrieval_type": "graph_only",
+      "question": "Did the motor driving P-204 have any problems around the same time?",
+      "hops": [
+        "IR-560",
+        "M-204",
+        "P-204"
+      ],
+      "vector_recall": 0.3333333333333333,
+      "hybrid_recall": 0.3333333333333333,
+      "vector_recall_at5": 0.3333333333333333,
+      "hybrid_recall_at5": 0.3333333333333333,
+      "vector_ranking": [
+        "IR-560_motor_inspection.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "SH-0717_shift_handover.pdf",
+        "IR-556_inspection_report.pdf",
+        "PWI_IOM.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "M-118_procedure.pdf"
+      ],
+      "hybrid_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "IR-556_inspection_report.pdf",
+        "SH-0717_shift_handover.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "M-118_procedure.pdf",
+        "LKH_manual.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "PWI_IOM.pdf",
+        "MaintMaster_manual.pdf"
+      ]
+    },
+    {
+      "id": "Q07",
+      "retrieval_type": "hybrid",
+      "question": "Why was the bearing replacement on P-204 delayed?",
+      "hops": [
+        "ML-1183"
+      ],
+      "vector_recall": 1.0,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 1.0,
+      "hybrid_recall_at5": 1.0,
+      "vector_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SH-0717_shift_handover.pdf",
+        "IR-556_inspection_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "M-118_procedure.pdf",
+        "PWI_IOM.pdf",
+        "VS-204_vibration_trend_log.pdf"
+      ],
+      "hybrid_ranking": [
+        "INC-2024-07_incident_report.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "IR-556_inspection_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "SH-0717_shift_handover.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "M-118_procedure.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "M-142_seal_procedure.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "MaintMaster_manual.pdf",
+        "PWI_IOM.pdf"
+      ]
+    },
+    {
+      "id": "Q08",
+      "retrieval_type": "graph_only",
+      "question": "Was the Zone D vibration alarm on P-204 acted upon?",
+      "hops": [
+        "VS-204",
+        "SH-0717",
+        "INC-2024-07"
+      ],
+      "vector_recall": 1.0,
+      "hybrid_recall": 1.0,
+      "vector_recall_at5": 1.0,
+      "hybrid_recall_at5": 0.6666666666666666,
+      "vector_ranking": [
+        "VS-204_vibration_trend_log.pdf",
+        "SH-0717_shift_handover.pdf",
+        "IR-556_inspection_report.pdf",
+        "IR-560_motor_inspection.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "M-118_procedure.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "PWI_IOM.pdf",
+        "SOP-09_pumphouse_safety.pdf"
+      ],
+      "hybrid_ranking": [
+        "IR-556_inspection_report.pdf",
+        "INC-2024-07_incident_report.pdf",
+        "M-118_procedure.pdf",
+        "IR-560_motor_inspection.pdf",
+        "VS-204_vibration_trend_log.pdf",
+        "SH-0717_shift_handover.pdf",
+        "ML-1183_maintenance_log.pdf",
+        "P-210_pump_manual_extract.pdf",
+        "SOP-09_pumphouse_safety.pdf",
+        "LS-07_lubrication_spec.pdf",
+        "MaintMaster_manual.pdf",
+        "PWI_IOM.pdf"
+      ]
+    }
+  ],
+  "by_retrieval_type": {
+    "graph_only": {
+      "n": 4,
+      "vector_avg_recall": 0.6166666666666667,
+      "hybrid_avg_recall": 0.6666666666666666
+    },
+    "keyword_answerable": {
+      "n": 2,
+      "vector_avg_recall": 1.0,
+      "hybrid_avg_recall": 1.0
+    },
+    "hybrid": {
+      "n": 2,
+      "vector_avg_recall": 1.0,
+      "hybrid_avg_recall": 1.0
+    }
+  },
+  "overall": {
+    "vector_avg_recall": 0.8083333333333333,
+    "hybrid_avg_recall": 0.8333333333333334,
+    "vector_avg_recall_at5": 0.7583333333333333,
+    "hybrid_avg_recall_at5": 0.7
+  }
+}

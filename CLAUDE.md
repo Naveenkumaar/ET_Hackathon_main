@@ -1,0 +1,421 @@
+# ET Hackathon — Industrial Knowledge Intelligence (Hybrid GraphRAG)
+
+> Windows GPU laptop setup is done - Python, tesseract (hardcoded path in loaders.py), all pip packages installed. Tomorrow's first task: add API credits, rotate key, run the extraction test, then proceed to knowledge graph builder.
+
+## FINAL LOCKED METRICS
+
+**UPDATE 17 Jul 2026: re-measurement DONE - metrics RE-LOCKED.**
+Full verification on macOS / Python 3.14 (fresh venv, tesseract via
+brew, all 17 docs incl. scanned OCR'd): 26/26 tests pass; vector store
+rebuilt with bge-small-en-v1.5 + windowed chunks; evaluate.py run 3x,
+byte-identical output (determinism holds).
+
+New locked numbers (top_k=12, scanned-twin dedupe, fair 20-chunk
+vector baseline):
+- Q01_STAR: hybrid 1.00 @12 (was 0.60) vs vector 0.80. The FULL star
+  chain is retrieved; the hybrid's additions over vector are exactly
+  VS-204 and M-118 - the docs whose text never mentions "P-204".
+- Overall @12: hybrid 0.83 vs vector 0.81 (old: 0.78 vs 0.69).
+- Overall @5: hybrid 0.70 vs vector 0.76 - hop-0 graph noise costs
+  precision at strict cutoffs on single-doc questions. Honest
+  trade-off, stated in the README; don't hide it in the pitch.
+- Q02: 0.33 both modes @12 (ceiling: only 1 of its 3 hops is a real
+  document). bge now finds M-118 semantically, so the old "only the
+  graph can reach Q02" evidence evaporated - the embedding upgrade
+  ate the graph's clearest aggregate win. The per-question Q01 chain
+  evidence is now the load-bearing proof, and it's stronger than ever.
+- Controls: all 1.00 in both modes.
+Deck slide 8 and detailed-document p10 updated to match these numbers.
+
+**These numbers are FINAL. Do not re-run benchmarks or extraction unless
+a genuine bug is found - no more tuning for score improvement from this
+point forward.**
+
+**ENTITY EXTRACTION (Macro-F1, excluding DATE - see note): 0.8411**
+- Precision issues: near-duplicate surface forms (P-204 vs Pump P-204,
+  M-118 vs Procedure M-118) - not hallucination, same real entity
+  captured twice
+- Recall: strong, only 3 misses across 39 gold entities
+- DATE excluded: ground truth has zero labeled DATE instances in this
+  document set, making recall undefined for that type
+
+**RETRIEVAL (hybrid vs keyword baseline):**
+- Q01_STAR (star demo question) recall: 0.60
+- Overall hybrid avg recall (8 questions): 0.78
+- Verified deterministic/reproducible across repeated runs
+
+**KNOWN LIMITATIONS (documented, understood root cause):**
+- Q02: hop-0 tie-flooding, 12 docs share identical graph score for mere
+  entity mention, defeats 2-hop-specific answer
+- VS-204 for Q01: consistently ranks just outside top-12, likely same
+  tie-flooding pattern
+
+## Submission document inaccuracy - caught and corrected before submission
+
+`~/Desktop/Industrial_Knowledge_Intelligence_Detailed_Document.pdf`
+(the hackathon submission writeup, separate from this repo) originally
+claimed in Section 10 (Scalability and Roadmap) that "Ingestion is
+incremental — new documents merge into the existing graph and vector
+store without a full rebuild." That's false against the actual code:
+`vector_builder.build_vector_store()` defaults to `reset=True` (wipes
+and rebuilds the whole ChromaDB collection every call), and
+`graph_builder.build_graph()` always constructs a brand-new graph from
+the full `extraction_results` dict - there's no code path that loads an
+existing graph and merges only new documents into it. The only
+genuinely incremental piece is the per-document extraction cache
+(`extractor.py`) - re-running extraction on an unchanged corpus costs
+zero additional API calls, but the downstream graph/vector-store build
+is always a full rebuild from that cache, not an incremental merge.
+
+Caught by cross-checking the submission PDF's claims against the real
+repo before the deadline, rather than after a judge tested it. Fixed by
+replacing that paragraph with an accurate description (cached
+per-document extraction is real and valuable; true incremental
+graph/vector-store merge is future work, not built). Edited directly in
+the PDF via PyMuPDF (redact + reinsert with the embedded Carlito font's
+metric-compatible system equivalent, Calibri, since the original
+embedded font was a subset missing most glyphs needed for new text) -
+verified by rendering every page before overwriting the original file.
+A pre-edit backup was kept alongside it
+(`Industrial_Knowledge_Intelligence_Detailed_Document.BACKUP.pdf`).
+
+## Problem Statement
+ET AI Hackathon 2.0, Problem #8: Industrial Knowledge Intelligence.
+Deadline: 22 July 2026, 11:59 PM.
+
+## Architecture (LOCKED — do not redesign)
+Hybrid GraphRAG:
+1. Document loader (ingest/loaders.py) — PyMuPDF + pytesseract OCR fallback
+2. Entity/relationship extractor (ingest/extractor.py) — Claude API, cached
+3. Knowledge graph builder — NetworkX (NOT YET BUILT)
+4. Vector store builder — ChromaDB + sentence-transformers (NOT YET BUILT)
+5. RRF fusion retriever (NOT YET BUILT)
+6. Synthesis agent — Claude API, answer + citation + confidence (NOT YET BUILT)
+7. Streamlit chat UI (NOT YET BUILT)
+
+## Dataset (LOCKED — do not regenerate or modify)
+- data/corpus/synthetic/ — 11 PDFs, planted P-204 near-miss chain + 6 distractors
+  Generated by generate_corpus.py (seed 42). DO NOT re-invent different entity IDs.
+- data/corpus/real/ — 3 real OEM pump manuals (PWI_IOM, LKH, MaintMaster)
+- data/corpus/scanned/ — 3 degraded PDFs for OCR testing (make_scanned.py)
+- data/eval/benchmark_questions.json — 8 questions (Q01-Q08), tagged by retrieval type
+- data/eval/ground_truth_entities.json — hand-labeled entities for Macro-F1
+- data/eval/failuresensoriq_*.json — IBM's dataset, 8296 QA pairs, CC-BY-4.0
+
+## The star demo chain (core story, memorize this)
+IR-556 (early warning, day -21) -> ML-1183 (deferred fix, day -14) ->
+VS-204 (alarm crossed, day -5) -> INC-2024-07 (failure, day 0) ->
+M-118/OISD-132 (what should have happened)
+Demo question: "Was there early warning before the P-204 failure?"
+Keyword search fails this. Graph traversal answers it correctly.
+
+## Rules for any CLI session working on this project
+- NEVER invent new entity IDs, document names, or corpus content.
+  Always check data/eval/*.json first to see what's expected.
+- NEVER regenerate data/corpus/ unless explicitly told to.
+- Extraction results are cached in .extraction_cache/ — don't delete without asking.
+- Model for extraction/synthesis: claude-sonnet-4-5
+- This is a SOLO hackathon build, hard deadline July 22. No scope creep.
+
+## Current status (update this section as we progress)
+- [x] Dataset built and locked (commit ed55d1f)
+- [x] Document loader built and tested (ingest/loaders.py)
+- [x] Entity extractor built (ingest/extractor.py)
+- [x] Live extraction test - CONFIRMED WORKING. Correctly extracted
+      P-204, R. Krishnan, M-118, ISO 10816-3, ISO 18436-2, all
+      measurements, and relationships (inspected_by, governed_by,
+      serviced_under, flagged_by). Loader -> OCR fallback -> Claude
+      extractor pipeline confirmed end-to-end on real data.
+- [x] Knowledge graph builder (ingest/graph_builder.py) - NetworkX MultiDiGraph
+      built from all 17 corpus docs (416 nodes, 235 edges). Fixed a real bug
+      along the way: extractor.py's max_tokens=2000 was truncating JSON on
+      the 3 large real OEM manuals (44-82k chars), causing silent empty
+      extractions - bumped to 8192 and all 17 docs now extract cleanly.
+      Entities merge across docs by exact text match (e.g. "P-204" links
+      IR-556 to M-118). Saved to data/knowledge_graph.json.
+- [x] Vector store builder (ingest/vector_builder.py) - ChromaDB
+      (PersistentClient, data/chroma_db/ - gitignored, regenerable) +
+      sentence-transformers (all-MiniLM-L6-v2). One chunk per page
+      (194 pages -> 192 non-empty chunks). Sample query "vibration alarm
+      threshold for Pump P-204's DE bearing" correctly top-ranked IR-556,
+      its scanned duplicate, and VS-204 - matches benchmark Q03's expected
+      source docs.
+- [x] RRF fusion retriever (ingest/retriever.py) - fuses vector_builder
+      semantic search with graph_builder traversal via Reciprocal Rank
+      Fusion. Query entities are matched by substring against graph node
+      text, then a per-entity bounded BFS (max_hops=2) scores docs by
+      closest hop, one contribution per (seed entity, doc) pair.
+      Found and fixed two real bugs while testing against all 8 benchmark
+      questions: (1) a shared-frontier BFS let the mega-hub "P-204" node
+      (mentioned in nearly every doc) flood all docs to the same hop-0
+      tie, drowning more specific co-matched entities like "Zone D" -
+      fixed by running a separate BFS per matched entity. (2) scoring
+      every node visited (rather than once per doc) rewarded the real
+      OEM manuals (90-130 entities each) purely for entity count, letting
+      them out-rank the tight synthetic narrative chain regardless of
+      relevance - fixed by capping each seed entity's contribution to
+      once per doc, at its closest hop.
+      Default top_k=10. Known limitation: M-118_procedure.pdf still
+      ranks low on the Q01/Q02/Q08 star-chain questions since it's a
+      short doc that never textually mentions "P-204" itself (only
+      reachable via a 1-hop "governed_by" edge) - its content is still
+      visible to the synthesis agent because IR-556/ML-1183 quote the
+      procedure by name, but this is worth re-checking once the
+      benchmark harness (stage 7) can score it objectively.
+- [x] Synthesis agent (ingest/synthesis.py) - takes the retriever's fused
+      doc_ids, pulls each doc's best-matching chunk (falling back to page
+      1 for docs found only via graph traversal, since they have no
+      vector hit), and asks Claude for {answer, citations, confidence}.
+      Tested on Q01_STAR and Q03: Q03 (control) answer was an exact
+      match to ground truth (7.1 mm/s RMS, ISO 10816-3 Zone D, high
+      confidence). Q01 (the star chain) correctly reconstructed the
+      full early-warning story - IR-556 elevated vibration -> ML-1183
+      deferred replacement -> M-118 clause 4.3 violation -> INC-2024-07
+      failure - even though VS-204/M-118_procedure.pdf weren't in the
+      top-10 retrieved doc_ids, because Claude picked up the clause
+      references quoted inside ML-1183's own text. High confidence,
+      correct citations. Good evidence the pipeline is robust to
+      retrieval gaps, not just a lucky ranking.
+- [x] Streamlit chat UI (app.py) - chat_message/chat_input over
+      ingest.synthesis, resources cached with @st.cache_resource,
+      renders answer + confidence badge + citations + a "Retrieval
+      details" expander (matched entities, retrieved doc_ids).
+      Picks up ANTHROPIC_API_KEY from the environment automatically;
+      falls back to a password-style text input if unset. Verified
+      with a real browser (Playwright + Chromium, installed for this
+      since no chromium-cli was available): launched the server,
+      submitted the Q03 question through the actual chat input, and
+      confirmed the rendered answer, confidence badge, citations, and
+      expander contents all matched the synthesis agent's output -
+      see screenshots from that run for the golden-path proof.
+- [x] Benchmark harness (evaluate.py) - scores vector-only retrieval vs
+      the RRF hybrid on all 8 benchmark questions using recall@top_k of
+      each question's expected "hops". Results saved to
+      data/eval/benchmark_results.json.
+      Caveat worth knowing: benchmark "hops" mix document IDs with
+      entity/regulation IDs that aren't documents at all (e.g. Q02's
+      hops are ["P-204", "M-118", "OISD-132"] - only M-118 is an actual
+      filename), so some questions have a recall ceiling below 1.0
+      regardless of retrieval quality. Read Q06's 0.33 in that light -
+      it's a perfect hit on its one real document target (IR-560), not
+      a partial miss.
+
+## Post-build review findings (user-requested full audit, then fixed)
+
+A full review of the actual code and live graph data (not just prose
+descriptions) surfaced two real bugs, both now fixed and re-verified:
+
+1. **Entity resolution was exact-string-only.** "P-204" was actually
+   split across 3 disconnected node identities (`P-204`, `Pump P-204`,
+   `Centrifugal Pump P-204`) because different documents used different
+   surface forms and graph_builder.py only merged on exact text match -
+   despite the module docstring claiming otherwise. Fixed by
+   canonicalizing node identity on an embedded ID token (e.g. "Pump
+   P-204" -> "P-204") in `_canonical_key()`; original surface forms are
+   kept as an `aliases` set on the node. Rebuilt from the existing
+   cached extraction_results.json (no new API calls needed) - graph
+   went from 416 nodes/74-ish fragmented equipment identities to 405
+   nodes, with P-204 now a single node of degree 38. The star chain
+   path IR-556 -> M-118 now resolves through the actual narrative doc
+   (`IR-556 -> ML-1183 -> M-118`) instead of an artifact node.
+
+2. **Q02's M-118 miss was a ranking cutoff, not a connectivity bug.**
+   Traced directly: M-118 is a real graph node, directly connected
+   (1 hop) to all P-204 variants and to OISD-132 (both `governed_by`
+   and `references` edges). The actual problem: ~8 documents mention
+   "P-204" directly (hop-0) and systematically outrank M-118_procedure.pdf
+   (hop-1, since that document's own text never mentions "P-204"),
+   landing it at fused position #11 of 17 - one slot past the old
+   top_k=10 cutoff. Fixed by bumping top_k to 12 in retriever.py,
+   synthesis.py, and evaluate.py.
+
+**Re-verified after both fixes:** Q02 hybrid recall 0.00 -> 0.33 (its
+one achievable target now recovered; vector-only stayed 0.00 as
+expected, since only graph traversal could reach it - this is the
+clearest single-question evidence yet that the graph is doing real
+work). M-118_procedure.pdf's fused position confirmed directly:
+#12 of 17 - it clears the new cutoff, but only just, so this remains a
+tight margin worth another look if time permits, not a robust win.
+graph_only avg recall: 0.38 -> 0.57 (vector -> hybrid, top_k=12).
+Overall: 0.69 -> 0.78. Q01_STAR still the clearest win: 0.20 -> 0.60.
+
+## Deeper dive: why does M-118 rank so low, exactly? (user-requested trace)
+
+User asked for the precise mechanism, not just "it's low." Traced with
+real numbers (not estimates): `graph_doc_ranking`'s BFS gives M-118 a
+real score (0.5, hop-1 from the P-204 seed - correctly connected, not
+a graph bug), but **RRF fusion discards score magnitude and keeps only
+rank position** - a hop-0 doc (score 1.0) and M-118 (score 0.5) become
+adjacent RRF contributions (`1/61` vs `1/62`) despite a real 2x gap in
+the underlying signal. Tested empirically whether reweighting RRF
+(graph weight 2x/3x/5x/10x, vector fixed) moves M-118 up: it does not,
+at any weight - confirmed M-118 sits at #14 of 16 *within the graph
+ranking itself*, and no scalar reweight can reorder a document within
+the same source list, only change how much that list counts relative
+to the other.
+
+## Entity-type-boost fix (implemented, tested, partial result - honest account)
+
+Root cause: 12 documents tie at hop-0 for Q02's query (anything merely
+mentioning "P-204"), all outranking M-118 (hop-1, score 0.5) regardless
+of tie-break sophistication, since sort is primarily by hop-tier score.
+
+Implemented a lightweight keyword-to-entity-type mapping
+(`QUERY_TYPE_TRIGGERS` in retriever.py - "regulation"/"governs" ->
+REGULATION, "procedure" -> PROCEDURE, "who"/"inspector" -> PERSON,
+"when" -> DATE) used only as a **tie-break within a hop tier**, never
+crossing hop-0 vs hop-1. Two iterations:
+1. First version checked only the original seed entities' 1-hop
+   neighbors for a type match. Traced why it failed: OISD-132 is 2 hops
+   from seed "P-204" (via M-118), not 1, so the boost fired on the
+   wrong document (`ISO 10816-3`, a different regulation 1 hop from
+   P-204, boosting IR-556 instead of M-118). Zero effect on Q02 recall.
+2. Extended to check every node reached in the BFS (not just seeds) -
+   correctly identifies M-118's own edge to OISD-132 this time. M-118
+   moved from graph-rank #14 -> #13 (wins the tie-break against its
+   hop-1 peers, P-210/SOP-09), but **cannot cross into hop-0** - with
+   12 documents already tied at hop-0 (exceeding top_k=10 on their own),
+   this is a hard mathematical ceiling of "hop-distance as primary sort
+   key, tie-break within-tier only," not a bug in the boost logic.
+   Confirmed via full 8-question benchmark: zero regressions, but also
+   zero net change to Q02's recall (stayed 0.00 at top_k=10).
+
+**A side-effect initially looked like a genuine improvement to
+Q01_STAR (0.60 -> 0.80) - this turned out to be a measurement artifact,
+see the non-determinism bug below. Corrected, stable number: 0.60,
+unchanged from before the type-boost.**
+
+**Final state:** top_k=12 restored (chosen over reverting to 10, since
+12 is the only currently-working way to actually retrieve M-118 for
+Q02). Type-boost code kept - it's correct and causes no regressions,
+even though it didn't move Q01 or Q02 once measured properly (see
+below). Q02/M-118 remains a known, well-understood limitation: fixing
+it for real would require either relaxing the "never cross hop tiers"
+constraint (risk: could let weakly-relevant hop-1 docs outrank
+genuinely relevant hop-0 docs elsewhere, untested) or reducing the
+hop-0 tie-flood at its source (distinguishing "trivially mentions the
+seed entity" from "is actually about the query's topic" - a deeper
+design change, not attempted given the deadline).
+
+## Critical bug found via UI testing: retrieval ranking was non-deterministic
+
+User asked me to actually run `streamlit run app.py` and drive the UI
+for the star demo question, rather than trust the numbers already
+logged. That surfaced a real bug bigger than anything above: **every
+benchmark number in this file up to this point was a snapshot of one
+random process run, not a stable metric.**
+
+Evidence: ran `evaluate.py` three times in a row with zero code or
+data changes between runs. Q01_STAR's hybrid recall came back 0.80,
+then 0.60, then 0.40 - three different answers from identical inputs.
+
+Root cause: `graph_doc_ranking`'s final sort
+(`key=lambda x: (-x[1], 0 if x[0] in boosted_docs else 1)`) and
+`rrf_fuse`'s sort (`key=lambda x: x[1]`) had no tie-break beyond score
+and boost status. Many documents legitimately tie on both (e.g. the
+12 hop-0-tied docs from the Q02 investigation above), so Python's
+stable sort fell back to whatever order those items arrived in - which
+traces back to iterating `set()` objects (`doc_ids` on graph nodes,
+BFS `frontier`/`next_frontier`, `boosted_docs`). Python randomizes
+string hashing per process by default, so that arrival order - and
+therefore every ranking with a tie in it - genuinely changed from run
+to run, with the same code and same data.
+
+**Fixed:** added `doc_id` (alphabetical) as the final tie-break key in
+both `graph_doc_ranking` and `rrf_fuse`. Verified by running
+`evaluate.py` three more times: byte-for-byte identical results all
+three times.
+
+**Corrected, now-stable final benchmark (top_k=12, with type-boost,
+fully deterministic):**
+graph_only avg recall: 0.38 -> 0.57 (vector -> hybrid). Overall:
+0.69 -> 0.78. Q01_STAR: 0.20 -> 0.60 (the 0.80 figure logged earlier
+in this file was a non-reproducible artifact of the bug above, not a
+real result - this 0.60 is the true, stable number, unchanged by the
+type-boost). Q02: 0.00 -> 0.33, also unchanged and still the known
+open limitation described above.
+
+**Why this matters beyond the number correction:** any retrieval
+system with real ties (common whenever many documents share a topic)
+needs an explicit, deterministic tie-break, or its behavior - and any
+benchmark built on top of it - is silently unreliable across restarts,
+deployments, or even repeated calls within the same session if the
+process restarts. This was caught by the user insisting on an actual
+UI run rather than trusting previously-logged numbers.
+
+## Post-review hardening (15 Jul 2026, pre-submission)
+
+An external architect-style review surfaced fragile areas; fixed in one
+pass:
+
+1. **Fresh-clone quick start actually works now.** app.py previously
+   crashed on a clone (chroma_db/ gitignored, load-only path).
+   `load_or_build_vector_store()` / `load_or_build_graph()` build from
+   the committed corpus/extraction results on first run - no API key
+   needed. The collection stamps its embedding model + chunk config in
+   metadata and auto-rebuilds when stale.
+2. **Tesseract path portable** - the hardcoded Windows path is now
+   conditional; macOS/Linux resolve tesseract from PATH (previously the
+   3 scanned PDFs silently dropped out of any non-Windows rebuild).
+3. **Citation validation** (synthesis._validate_citations) - model
+   citations are whitelisted against the doc_ids actually in context;
+   short forms ("IR-556") resolve to full filenames; hallucinated
+   citations can no longer render in the UI.
+4. **Timeout + retries** on the synthesis client (60s, 3 retries),
+   friendly UI error instead of a traceback.
+5. **Graph path visualization** (ingest/path_viz.py, pyvis) - per-answer
+   "Why these documents" expander renders shortest paths from query
+   entities to each cited doc, relation-labeled edges. vis.js inlined
+   and Bootstrap CDN tags stripped: works with no internet at the venue.
+6. **Observability** (ingest/tracing.py) - every synthesize() appends a
+   JSON line to logs/query_traces.jsonl: latency split (retrieval vs
+   LLM), token usage, matched entities, rankings, citations, cache
+   status. Tracing failures never break the answer path.
+7. **Answer cache** (.synthesis_cache/) - repeat questions return
+   instantly with a ⚡ badge, no API call. Keyed on
+   (model, top_k, normalized query).
+8. **Chunking/embedding fix** - whole-page chunks were silently
+   truncated at all-MiniLM-L6-v2's ~256-token limit (long OEM-manual
+   pages mostly invisible to vector search). Now: overlapping
+   380-word/57-overlap page windows + BAAI/bge-small-en-v1.5 (512-token
+   window). RETRIEVAL METRICS MUST BE RE-MEASURED (see note at top).
+9. **tests/** - pytest suite: eval-dataset validation (every benchmark
+   hop resolves to a real corpus doc or graph node), graph invariants
+   (star chain connected, P-204 canonicalized to one hub node),
+   chunking overlap/no-loss, citation whitelist, RRF tie-break
+   determinism. Heavy-dep tests skip cleanly where chromadb/anthropic
+   aren't installed.
+
+## Second hardening pass (same day, "fix all the issues")
+
+10. **Fuzzy entity matching** (retriever.match_entities) - three tiers:
+    node key verbatim, any stored alias verbatim, punctuation-insensitive
+    ID match ("p204"/"P 204" -> "P-204"). Paraphrased judge questions no
+    longer silently lose the graph signal. Deterministic ordering kept.
+11. **Scanned-twin dedupe** (_canonical_doc/_dedupe_canonical) - the
+    _SCANNED duplicates no longer eat top-k slots; applied to vector and
+    graph rankings AND re-applied post-fusion (the two sources can keep
+    different twins of the same pair). This frees 2-3 slots on the star
+    question - likely to move Q01 recall up for real. AFFECTS BENCHMARKS:
+    covered by the same re-measurement TODO as the chunking change.
+12. **Conversational memory** (synthesize(history=...)) - app passes prior
+    turns; follow-ups with no entity IDs borrow the previous user turn
+    for retrieval seeding; last 6 turns go to the model marked as
+    reference-resolution context, not fact source. Cache key includes
+    history so cached answers can't leak across different conversations.
+13. **Targeted context for graph-only docs** - instead of blindly taking
+    page 1, _gather_context now vector-queries within that doc for the
+    best chunk for this query.
+14. **Robust JSON parsing** (_parse_json_response) - fence-tolerant,
+    extracts the first {...} block from stray prose; replaces the
+    hand-rolled strip("`").
+15. **evaluate.py reports recall@5 alongside recall@top_k** - on a 17-doc
+    corpus recall@12 is close to chance; @5 is the number that actually
+    proves the hybrid earns its place. Lead with @5 in the deck.
+
+Known follow-ups deliberately NOT done: hop-0 tie-flooding redesign
+(Q02 ceiling - dedupe partially relieves it but the tier design stands),
+groundedness scoring of answer text against sources (hallucination
+handling is currently: extraction/synthesis prompt constraints +
+citation whitelist + self-reported confidence - the answer text itself
+is not verified).
